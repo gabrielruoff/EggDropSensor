@@ -3,6 +3,9 @@
 #include <Adafruit_LSM303_U.h>
 #include <Adafruit_L3GD20_U.h>
 #include <Adafruit_9DOF.h>
+#include <SoftwareSerial.h>
+
+SoftwareSerial bt(2, 3);
 
 //Define Global Variables
 Adafruit_9DOF dof   = Adafruit_9DOF();
@@ -23,8 +26,9 @@ void initSensors()
 }
 
 void setup() {
-  // put your setup code here, to run once:
+  // put your setup code here, to run once: 
 
+  bt.begin(9600);
   Serial.begin(115200);
   Serial.println(F("Egg Drop")); Serial.println("");
   
@@ -44,7 +48,7 @@ void loop() {
     Serial.print(("Z: "));
     Serial.println(accel_event.acceleration.z);
 
-      sensors_vec_t   orientation;
+      sensors_vec_t orientation;
 
   /* Calculate pitch and roll from the raw accelerometer data */
   accel.getEvent(&accel_event);
@@ -67,13 +71,15 @@ void loop() {
 
   //Get acceleration again and compare
   accel.getEvent(&accel_event);
+  
   totalAcc = (sqrt(sq(accel_event.acceleration.x) + sq(accel_event.acceleration.y) + sq(accel_event.acceleration.z)));
+  
   Serial.println(totalAcc);
 
   accelerations[0] = oldTotalAcc;
 
   //Detect sudden change
-  if((abs(totalAcc - oldTotalAcc)) > 20) {
+  if((abs(totalAcc - oldTotalAcc)) > 10) {
 
       Serial.println("Sudden Change!");
       
@@ -91,6 +97,7 @@ void loop() {
 void record(long time) {
 
   accel.getEvent(&accel_event);
+  
   double totalAcc = (sqrt(sq(accel_event.acceleration.x) + sq(accel_event.acceleration.y) + sq(accel_event.acceleration.z)));
 
   double highestAcc = 0;
@@ -135,6 +142,7 @@ void record(long time) {
   Serial.println(" milliseconds");
 
   printData();
+  sendData();
   
 }
 
@@ -143,11 +151,11 @@ void printData() {
 
   Serial.println("Printing Array Data");
 
-  for(int i = 0; i < 100; i++) {
+  for(int i = 0; i < sizeof(accelerations)/4; i++) {
 
    int j = 0;
 
-    while(((i+j)<100) && j < 5) {
+    while(((i+j)<sizeof(accelerations)/4) && j < 5) {
 
     Serial.print(accelerations[i+j]);
     Serial.print(", ");
@@ -159,6 +167,22 @@ void printData() {
     i += 4;
 
     Serial.println();
+    
+  }
+  
+}
+
+//Send data to java
+void sendData() {
+
+  for(int i = 0; i < sizeof(accelerations)/4; i++) {
+    
+    Serial.print("Printing: ");
+    Serial.println(accelerations[i]);
+    bt.println(accelerations[i]);
+
+    //reset array
+    accelerations[i] = 0;
     
   }
   
