@@ -27,8 +27,13 @@ public class ReadData {
 	//Data array
 	static double[] data = new double[100];
 	
+	//Main
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+
+	}
+	
+	//Log data and save to file
+	public static void logData() {
 
 		boolean loop = false;
 		
@@ -40,9 +45,13 @@ public class ReadData {
 			
 			System.out.println("connecting...");
 			
+			EggDropGui.addText("Connecting...");
+			
 		(new ReadData()).connect("/dev/cu.HC-06-DevB");
 		
 		System.out.println("connected");
+		
+		EggDropGui.addText("Connected");
 		
 		}
 		
@@ -90,6 +99,7 @@ public class ReadData {
 		}
 		
 		//Print out the input data
+		EggDropGui.addText(Double.toString(input));
 		System.out.println(input);
 		
 		}
@@ -126,6 +136,8 @@ public class ReadData {
 		   if ( portIdentifier.isCurrentlyOwned() ) {
 			
 			   System.out.println("Error: Port is currently in use");
+			   
+				EggDropGui.addText("Error: Port is currently in use");
 		
 		   }
 		
@@ -147,6 +159,8 @@ public class ReadData {
 			
 				System.out.println("Error: Only serial ports are handled by this example.");
 			
+				EggDropGui.addText("Error: Only serial ports are handled by this example.");
+				
 			}
 		}
 	}
